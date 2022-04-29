@@ -8,25 +8,25 @@ import 'package:http_request_api/models/movie.dart';
 
 class MovieList extends StatefulWidget {
   @override
-  _MovieListState createState() => _MovieListState();
+  State<MovieList> createState() => _MovieListState();
 }
 
 class _MovieListState extends State<MovieList> {
-  late int moviesCount;
+  late int moviesCount = 0;
   late List movies;
   late HttpService service;
-  bool _isLoading = true;
+  final String imgPath = 'https://image.tmdb.org/t/p/w500/';
 
   Future initialize() async {
-    service.getPopularMovies().then((value) => {
-          setState(() {
-            movies = value!;
-            moviesCount = movies.length;
-            _isLoading = false;
-          })
-        });
+    movies = [];
+    movies = (await service.getPopularMovies())!;
+    setState(() {
+      moviesCount = movies.length;
+      movies = movies;
+    });
   }
 
+  @override
   void initState() {
     service = HttpService();
     initialize();
@@ -37,31 +37,31 @@ class _MovieListState extends State<MovieList> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Popular Movies"),
+          title: Text("Popular Movies - (Muslimatul R A -> 2031710076)"),
         ),
-        body: _isLoading
-            ? Center(
-                child: CircularProgressIndicator(),
-              )
-            : ListView.builder(
-                itemCount: (moviesCount == null) ? 0 : moviesCount,
-                itemBuilder: (context, int position) {
-                  return Card(
-                    color: Colors.white,
-                    elevation: 2.0,
-                    child: ListTile(
-                      title: Text(movies[position].title),
-                      subtitle: Text(
-                        'Rating = ' + movies[position].voteAverage.toString(),
-                      ),
-                      onTap: () {
-                        MaterialPageRoute route = MaterialPageRoute(
-                            builder: (_) => MovieDetail(movies[position]));
-                        Navigator.push(context, route);
-                      },
-                    ),
-                  );
+        body: ListView.builder(
+          itemCount: (moviesCount == null) ? 0 : moviesCount,
+          itemBuilder: (context, int position) {
+            return Card(
+              color: Color.fromARGB(255, 231, 178, 178),
+              elevation: 3.0,
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundImage:
+                      NetworkImage(imgPath + movies[position].posterPath),
+                ),
+                title: Text(movies[position].title),
+                subtitle: Text(
+                  'Rating = ' + movies[position].voteAverage.toString(),
+                ),
+                onTap: () {
+                  MaterialPageRoute route = MaterialPageRoute(
+                      builder: (_) => MovieDetail(movies[position]));
+                  Navigator.push(context, route);
                 },
-              ));
+              ),
+            );
+          },
+        ));
   }
 }
